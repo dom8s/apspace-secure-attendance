@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>APSpace Secure Attendance</title>
+    <style>
+        /* ── Reset & Base ── */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:      #0d0d0d;
+            --card:    #1a1a1a;
+            --input:   #222222;
+            --accent:  #f5a623;
+            --text:    #f0f0f0;
+            --muted:   #888888;
+            --border:  #2a2a2a;
+            --success: #4caf50;
+            --danger:  #f44336;
+            --warning: #ff9800;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            font-size: 15px;
+        }
+
+        /* ── Screens ── */
+        .screen { display: none; flex-direction: column; min-height: 100vh; }
+        .screen.active { display: flex; }
+
+        /* ── Top Bar ── */
+        .topbar {
+            background: var(--card);
+            padding: 48px 20px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topbar-brand {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+        .topbar-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        /* ── Content area ── */
+        .content { flex: 1; padding: 20px; }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        /* ── Labels ── */
+        .label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        /* ── Inputs ── */
+        .input {
+            width: 100%;
+            background: var(--input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            padding: 12px 14px;
+            font-size: 15px;
+            outline: none;
+            margin-bottom: 16px;
+        }
+
+        .input:focus { border-color: var(--accent); }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            width: 100%;
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        /* ── OTP Boxes ── */
+        .otp-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .otp-box {
+            width: 72px; height: 72px;
+            background: var(--input);
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--accent);
+            text-align: center;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .otp-box:focus { border-color: #fff; }
+
+        /* ── Status badges ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-accepted { background: rgba(76,175,80,.15);  color: #4caf50; }
+        .badge-flagged  { background: rgba(255,152,0,.15);  color: #ff9800; }
+        .badge-rejected { background: rgba(244,67,54,.15);  color: #f44336; }
+
+        /* ── Wi-Fi status ── */
+        .wifi-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .wifi-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Alerts ── */
+        .alert {
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .alert.show { display: block; }
+        .alert-error   { background: rgba(244,67,54,.1);  border: 1px solid rgba(244,67,54,.3);  color: #f44336; }
+        .alert-success { background: rgba(76,175,80,.1);  border: 1px solid rgba(76,175,80,.3);  color: #4caf50; }
+        .alert-warning { background: rgba(255,152,0,.1);  border: 1px solid rgba(255,152,0,.3);  color: #ff9800; }
+
+        /* ── Bottom nav ── */
+        .bottom-nav {
+            display: flex;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            padding: 10px 0;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .nav-btn.active { color: var(--accent); font-weight: 700; }
+
+        /* ── History list ── */
+        .history-item {
+            border-bottom: 1px solid var(--border);
+            padding: 14px 0;
+        }
+
+        .history-item:last-child { border-bottom: none; }
+
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ── Loading spinner ── */
+        .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+            margin: 12px auto;
+        }
+
+        .spinner.show { display: block; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── Login special styles ── */
+        #loginScreen {
+            justify-content: center;
+            padding: 32px 24px;
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-brand-name {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 3px;
+        }
+
+        .login-brand-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* ── Stat cards ── */
+        .stat-row { display: flex; gap: 10px; margin-bottom: 16px; }
+
+        .stat-card {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+    </style>
+</head>
+<body>
+
+<!-- 
+    SCREEN 1: LOGIN
+ -->
+<div id="loginScreen" class="screen active">
+    <div class="login-brand">
+        <div class="login-brand-name">APSpace</div>
+        <div class="login-brand-sub">Secure Attendance System</div>
+    </div>
+
+    <div id="loginError" class="alert alert-error"></div>
+
+    <label class="label">TP NUMBER</label>
+    <input id="tpNumber" class="input" type="text" placeholder="e.g. TP077423" />
+
+    <label class="label">PASSWORD</label>
+    <input id="password" class="input" type="password" placeholder="Enter your password" />
+
+    <div class="spinner" id="loginSpinner"></div>
+    <button class="btn-primary" onclick="doLogin()">Sign In</button>
+
+    <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:24px">
+        🔒 Student access only
+    </p>
+</div>
+
+<!-- 
+     SCREEN 2: ATTENDANCE
+ -->
+<div id="attendanceScreen" class="screen">
+    <!-- Top Bar -->
+    <div class="topbar">
+        <div class="topbar-row">
+            <div>
+                <div class="topbar-brand">APSpace</div>
+                <div id="studentName" class="topbar-sub">Loading...</div>
+                <div id="studentTP" class="topbar-sub" style="color:var(--muted)"></div>
+            </div>
+            <button class="btn-danger" onclick="doLogout()" style="margin-top:4px">Sign Out</button>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- Wi-Fi Status -->
+        <div class="wifi-status">
+            <div class="wifi-dot" id="wifiDot" style="background:var(--muted)"></div>
+            <span id="wifiStatusText" style="font-size:13px">Checking network...</span>
+            <button onclick="checkWifi()" style="margin-left:auto;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer">↻</button>
+        </div>
+
+        <!-- Attendance Card -->
+        <div class="card">
+            <div style="font-size:16px;font-weight:700;margin-bottom:4px">Sign Class Attendance</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Enter the 3-character code from your lecturer</div>
+
+            <!-- 3-Box OTP Input -->
+            <div class="otp-row">
+                <input class="otp-box" id="d1" maxlength="1" oninput="nextDigit(this,'d2')" />
+                <input class="otp-box" id="d2" maxlength="1" oninput="nextDigit(this,'d3')" />
+                <input class="otp-box" id="d3" maxlength="1" />
+            </div>
+
+            <div id="submitError"   class="alert alert-error"></div>
+            <div id="submitSuccess" class="alert alert-success"></div>
+            <div id="submitWarning" class="alert alert-warning"></div>
+
+            <div class="spinner" id="submitSpinner"></div>
+            <button class="btn-primary" onclick="doSubmit()">Submit Attendance</button>
+        </div>
+
+        <!-- Device Info Card -->
+        <div class="card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)">SESSION INFO</div>
+            <div style="font-size:12px;color:var(--muted)">Device ID: <span id="deviceId" style="color:var(--accent)">Generating...</span></div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">IP Address: <span id="ipDisplay" style="color:var(--text)">—</span></div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <button class="nav-btn active" onclick="showTab('attendance')">📋 Attendance</button>
+        <button class="nav-btn" onclick="showTab('history')">🕐 History</button>
+    </div>
+</div>
+
+<!-- 
+     SCREEN 3: HISTORY
+ -->
+<div id="historyScreen" class="screen">
+    <div class="topbar">
+        <div class="topbar-row">
+            <div>
+                <div class="topbar-brand">APSpace</div>
+                <div style="font-size:13px;font-weight:600;margin-top:2px">Attendance History</div>
+                <div id="historyTP" class="topbar-sub" style="color:var(--muted)"></div>
+            </div>
+            <button class="btn-outline" onclick="loadHistory()" style="margin-top:4px">↻ Refresh</button>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Stats -->
+        <div class="stat-row" id="historyStats"></div>
+
+        <div class="card" id="historyList">
+            <div style="text-align:center;padding:30px;color:var(--muted)">
+                Loading attendance records...
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" onclick="showTab('attendance')">📋 Attendance</button>
+        <button class="nav-btn active" onclick="showTab('history')">🕐 History</button>
+    </div>
+</div>
+
+
+<!-- 
+     JAVASCRIPT
+ -->
+<script>
+//  Config 
+const API_BASE = 'http://localhost:5215';
+
+let authToken   = '';
+let studentName = '';
+let studentTP   = '';
+let deviceId    = '';
+let wifiSSID    = '';
+let ipAddress   = '';
+
+//  App State 
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function showTab(tab) {
+    if (tab === 'attendance') {
+        showScreen('attendanceScreen');
+        checkWifi();
+    } else {
+        showScreen('historyScreen');
+        loadHistory();
+    }
+}
+
+//  Device Fingerprint
+async function getDeviceId() {
+    let id = localStorage.getItem('fyp_device_id');
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('fyp_device_id', id);
+    }
+    // Hash it
+    const enc  = new TextEncoder().encode(id + navigator.userAgent);
+    const hash = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(hash))
+                .map(b => b.toString(16).padStart(2, '0'))
+                .join('');
+}
+
+//  Network Info 
+async function checkWifi() {
+    const dot  = document.getElementById('wifiDot');
+    const text = document.getElementById('wifiStatusText');
+    text.textContent = 'Checking network...';
+    dot.style.background = 'var(--muted)';
+
+    // Get public IP to estimate network
+    try {
+        const resp = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) });
+        const data = await resp.json();
+        ipAddress = data.ip;
+        document.getElementById('ipDisplay').textContent = ipAddress;
+    } catch {
+        ipAddress = '10.0.1.5';
+    }
+
+    // Browser cannot read Wi-Fi SSID for privacy reasons
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const type = conn?.effectiveType || 'unknown';
+    const online = navigator.onLine;
+
+    if (!online) {
+        text.textContent = 'No network connection';
+        dot.style.background = 'var(--danger)';
+        wifiSSID = '';
+        return;
+    }
+
+    // For demo purposes on emulator - set SSID to campus network
+    // In real deployment on campus, this would read from the device
+    wifiSSID = 'Pronghorn Weefee'; 
+    text.textContent = '✓ Connected to Student@APU (Simulated)';
+    dot.style.background = 'var(--success)';
+}
+
+//  Login 
+async function doLogin() {
+    const tp   = document.getElementById('tpNumber').value.trim();
+    const pass = document.getElementById('password').value;
+    const err  = document.getElementById('loginError');
+    const spin = document.getElementById('loginSpinner');
+
+    err.classList.remove('show');
+
+    if (!tp || !pass) {
+        err.textContent = 'Please enter your TP number and password.';
+        err.classList.add('show');
+        return;
+    }
+
+    spin.classList.add('show');
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/Auth/login`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ tpNumber: tp, password: pass })
+        });
+
+        if (!resp.ok) {
+            err.textContent = 'Invalid TP number or password.';
+            err.classList.add('show');
+            return;
+        }
+
+        const data = await resp.json();
+
+        if (data.role !== 'Student') {
+            err.textContent = 'This app is for students only.';
+            err.classList.add('show');
+            return;
+        }
+
+        // Save session
+        authToken   = data.token;
+        studentName = data.fullName;
+        studentTP   = data.tpNumber;
+
+        document.getElementById('studentName').textContent = studentName;
+        document.getElementById('studentTP').textContent   = studentTP;
+        document.getElementById('historyTP').textContent   = studentTP;
+
+        // Generate device ID
+        deviceId = await getDeviceId();
+        document.getElementById('deviceId').textContent =
+            deviceId.substring(0, 16) + '...';
+
+        showScreen('attendanceScreen');
+        checkWifi();
+
+    } catch (e) {
+        err.textContent = 'Cannot reach server. Make sure the API is running.';
+        err.classList.add('show');
+    } finally {
+        spin.classList.remove('show');
+    }
+}
+
+//  Submit Attendance 
+async function doSubmit() {
+    const d1   = document.getElementById('d1').value;
+    const d2   = document.getElementById('d2').value;
+    const d3   = document.getElementById('d3').value;
+    const code = (d1 + d2 + d3).toUpperCase();
+
+    const errEl  = document.getElementById('submitError');
+    const sucEl  = document.getElementById('submitSuccess');
+    const warnEl = document.getElementById('submitWarning');
+    const spin   = document.getElementById('submitSpinner');
+
+    errEl.classList.remove('show');
+    sucEl.classList.remove('show');
+    warnEl.classList.remove('show');
+
+    if (code.length !== 3) {
+        errEl.textContent = 'Please enter all 3 digits of the session code.';
+        errEl.classList.add('show');
+        return;
+    }
+
+    spin.classList.add('show');
+    await checkWifi();
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/Attendance/submit`, {
+            method:  'POST',
+            headers: {
+                'Content-Type':  'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                sessionCode:       code,
+                deviceFingerprint: deviceId,
+                wifiSSID:          wifiSSID,
+                iPAddress:         ipAddress
+            })
+        });
+
+        const data = await resp.json();
+
+        if (data.status === 'Accepted') {
+            sucEl.textContent = '✓ Attendance recorded successfully!';
+            sucEl.classList.add('show');
+            document.getElementById('d1').value = '';
+            document.getElementById('d2').value = '';
+            document.getElementById('d3').value = '';
+        } else if (data.status === 'Flagged') {
+            warnEl.textContent = '⚠ Attendance submitted but flagged for review.';
+            warnEl.classList.add('show');
+            document.getElementById('d1').value = '';
+            document.getElementById('d2').value = '';
+            document.getElementById('d3').value = '';
+        } else {
+            errEl.textContent = data.message || 'Attendance rejected.';
+            errEl.classList.add('show');
+        }
+
+    } catch (e) {
+        errEl.textContent = 'Cannot reach server. Make sure the API is running.';
+        errEl.classList.add('show');
+    } finally {
+        spin.classList.remove('show');
+    }
+}
+
+//  Load History 
+async function loadHistory() {
+    const list  = document.getElementById('historyList');
+    const stats = document.getElementById('historyStats');
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">Loading...</div>';
+    stats.innerHTML = '';
+
+    try {
+        const resp = await fetch(`${API_BASE}/api/Attendance/my`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        const records = await resp.json();
+
+        // Stats
+        const accepted = records.filter(r => r.status === 'Accepted').length;
+        const flagged  = records.filter(r => r.status === 'Flagged').length;
+        const rejected = records.filter(r => r.status === 'Rejected').length;
+
+        stats.innerHTML = `
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--success)">${accepted}</div>
+                <div class="stat-label">Accepted</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--warning)">${flagged}</div>
+                <div class="stat-label">Flagged</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color:var(--danger)">${rejected}</div>
+                <div class="stat-label">Rejected</div>
+            </div>`;
+
+        if (!records.length) {
+            list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--muted)">No attendance records yet.</div>';
+            return;
+        }
+
+        list.innerHTML = records.map(r => `
+            <div class="history-item">
+                <div class="history-row">
+                    <div>
+                        <div style="font-weight:700">${r.subjectCode || '—'}</div>
+                        <div style="font-size:12px;color:var(--muted)">${r.subjectName || ''}</div>
+                    </div>
+                    <span class="badge badge-${r.status.toLowerCase()}">${r.status}</span>
+                </div>
+                <div style="margin-top:6px;font-size:12px;color:var(--muted)">
+                    Code: <span style="color:var(--accent);font-weight:700">${r.sessionCode}</span>
+                    &nbsp;·&nbsp;
+                    ${new Date(r.submittedAt).toLocaleDateString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+                </div>
+            </div>`).join('');
+
+    } catch (e) {
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--danger)">Failed to load history.</div>';
+    }
+}
+
+//  Auto-focus OTP 
+function nextDigit(el, nextId) {
+    if (el.value.length === 1 && nextId) {
+        document.getElementById(nextId).focus();
+    }
+}
+
+//  Logout 
+function doLogout() {
+    authToken = ''; studentName = ''; studentTP = '';
+    document.getElementById('tpNumber').value = '';
+    document.getElementById('password').value = '';
+    showScreen('loginScreen');
+}
+
+//  Allow Enter key on login 
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.getElementById('loginScreen').classList.contains('active')) {
+        doLogin();
+    }
+});
+</script>
+
+</body>
+</html>
