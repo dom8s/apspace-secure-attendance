@@ -1,0 +1,131 @@
+@model AdminDashboardViewModel
+@{ ViewData["Title"] = "Admin Dashboard"; }
+
+<div class="page-header">
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Overview of attendance security across all sessions</div>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card accent">
+            <i class="bi bi-people-fill stat-icon"></i>
+            <div class="stat-value">@Model.TotalStudents</div>
+            <div class="stat-label">Total Students</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card success">
+            <i class="bi bi-check-circle-fill stat-icon"></i>
+            <div class="stat-value">@Model.TotalAccepted</div>
+            <div class="stat-label">Accepted</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card warning">
+            <i class="bi bi-flag-fill stat-icon"></i>
+            <div class="stat-value">@Model.TotalFlagged</div>
+            <div class="stat-label">Flagged</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card danger">
+            <i class="bi bi-x-circle-fill stat-icon"></i>
+            <div class="stat-value">@Model.TotalRejected</div>
+            <div class="stat-label">Rejected</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Flagged -->
+<div class="card-dark">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <div style="font-size:0.95rem;font-weight:600;">Recent Flagged Submissions</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Latest 5 flagged or rejected records</div>
+        </div>
+        <a href="/Admin/Flagged" class="btn-outline-accent">View All</a>
+    </div>
+
+    @if (!Model.RecentFlagged.Any())
+    {
+        <div style="text-align:center;padding:30px;color:var(--text-muted);font-size:0.875rem;">
+            <i class="bi bi-shield-check" style="font-size:2rem;display:block;margin-bottom:8px;color:var(--success)"></i>
+            No flagged submissions. System is clean.
+        </div>
+    }
+    else
+    {
+        <table class="table-dark-custom w-100">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Session</th>
+                    <th>Wi-Fi Used</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.RecentFlagged)
+                {
+                    <tr>
+                        <td>
+                            <div style="font-weight:600">@item.TPNumber</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted)">@item.StudentName</div>
+                        </td>
+                        <td>@item.SubjectCode</td>
+                        <td><code style="color:var(--accent)">@item.SessionCode</code></td>
+                        <td style="color:var(--text-muted);font-size:0.8rem">@item.WifiSSID</td>
+                        <td>
+                            @if (item.Status == "Flagged")
+                            {
+                                <span class="badge-flagged">⚠ Flagged</span>
+                            }
+                            else
+                            {
+                                <span class="badge-rejected">✕ Rejected</span>
+                            }
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.78rem">
+                            @item.SubmittedAt.ToString("dd MMM HH:mm")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- Quick Links -->
+<div class="row g-3 mt-2">
+    <div class="col-md-4">
+        <a href="/Admin/Flagged" style="text-decoration:none">
+            <div class="card-dark" style="cursor:pointer;transition:border 0.2s" onmouseover="this.style.borderColor='var(--warning)'" onmouseout="this.style.borderColor='var(--border)'">
+                <i class="bi bi-flag-fill" style="color:var(--warning);font-size:1.5rem"></i>
+                <div style="margin-top:8px;font-weight:600">Flagged Attendance</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">Review all flagged and rejected records</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="/Admin/DeviceLogs" style="text-decoration:none">
+            <div class="card-dark" style="cursor:pointer;transition:border 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+                <i class="bi bi-phone-fill" style="color:var(--accent);font-size:1.5rem"></i>
+                <div style="margin-top:8px;font-weight:600">Device Logs</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">Monitor device fingerprint usage</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="/Admin/Summary" style="text-decoration:none">
+            <div class="card-dark" style="cursor:pointer;transition:border 0.2s" onmouseover="this.style.borderColor='var(--success)'" onmouseout="this.style.borderColor='var(--border)'">
+                <i class="bi bi-bar-chart-fill" style="color:var(--success);font-size:1.5rem"></i>
+                <div style="margin-top:8px;font-weight:600">Attendance Summary</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">View per-student attendance rates</div>
+            </div>
+        </a>
+    </div>
+</div>

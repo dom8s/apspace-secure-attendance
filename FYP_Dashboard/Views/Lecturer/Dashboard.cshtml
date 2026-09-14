@@ -1,0 +1,83 @@
+@* ── Dashboard.cshtml (Lecturer) ── *@
+@model LecturerDashboardViewModel
+@{ ViewData["Title"] = "Lecturer Dashboard"; }
+
+<div class="page-header">
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Manage your attendance sessions</div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card accent">
+            <i class="bi bi-calendar3 stat-icon"></i>
+            <div class="stat-value">@Model.TotalSessions</div>
+            <div class="stat-label">Total Sessions</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card success">
+            <i class="bi bi-broadcast stat-icon"></i>
+            <div class="stat-value">@Model.ActiveSessions</div>
+            <div class="stat-label">Active Sessions</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card warning">
+            <i class="bi bi-plus-circle-fill stat-icon"></i>
+            <div class="stat-value" style="font-size:1rem;padding-top:6px">
+                <a href="/Lecturer/CreateSession" class="btn-accent" style="font-size:0.85rem">
+                    New Session
+                </a>
+            </div>
+            <div class="stat-label">Quick Action</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-dark">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div style="font-size:0.95rem;font-weight:600">Recent Sessions</div>
+        <a href="/Lecturer/Sessions" class="btn-outline-accent">View All</a>
+    </div>
+
+    @if (!Model.RecentSessions.Any())
+    {
+        <div style="text-align:center;padding:30px;color:var(--text-muted)">
+            No sessions yet. <a href="/Lecturer/CreateSession" style="color:var(--accent)">Create one now.</a>
+        </div>
+    }
+    else
+    {
+        <table class="table-dark-custom">
+            <thead>
+                <tr><th>Code</th><th>Subject</th><th>Created</th><th>Expires</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model.RecentSessions)
+                {
+                    <tr>
+                        <td><code style="color:var(--accent);font-size:1.1rem;font-weight:700;letter-spacing:4px">@s.SessionCode</code></td>
+                        <td>
+                            <div>@s.SubjectCode</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted)">@s.SubjectName</div>
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.8rem">@s.CreatedAt.ToString("dd MMM HH:mm")</td>
+                        <td style="color:var(--text-muted);font-size:0.8rem">@s.ExpiresAt.ToString("dd MMM HH:mm")</td>
+                        <td>
+                            @if (s.IsActive && s.ExpiresAt > DateTime.UtcNow)
+                            {
+                                <span class="badge-active">● Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge-closed">Closed</span>
+                            }
+                        </td>
+                        <td><a href="/Lecturer/SessionDetail?id=@s.SessionId" class="btn-outline-accent">Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

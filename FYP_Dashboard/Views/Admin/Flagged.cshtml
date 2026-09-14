@@ -1,0 +1,74 @@
+@* ── Flagged.cshtml ── *@
+@model List<FlaggedAttendanceViewModel>
+@{ ViewData["Title"] = "Flagged Attendance"; }
+
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div>
+        <div class="page-title">Flagged Attendance</div>
+        <div class="page-subtitle">All rejected and flagged submission records</div>
+    </div>
+    <span style="font-size:0.8rem;color:var(--text-muted)">@Model.Count total records</span>
+</div>
+
+<div class="card-dark">
+    @if (!Model.Any())
+    {
+        <div style="text-align:center;padding:40px;color:var(--text-muted)">
+            <i class="bi bi-shield-check" style="font-size:2.5rem;display:block;margin-bottom:10px;color:var(--success)"></i>
+            No flagged or rejected submissions found.
+        </div>
+    }
+    else
+    {
+        <table class="table-dark-custom">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Session</th>
+                    <th>Network Used</th>
+                    <th>IP Address</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td style="color:var(--text-muted)">@item.AttendanceId</td>
+                        <td>
+                            <div style="font-weight:600">@item.TPNumber</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted)">@item.StudentName</div>
+                        </td>
+                        <td>
+                            <div>@item.SubjectCode</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted)">@item.SubjectName</div>
+                        </td>
+                        <td><code style="color:var(--accent)">@item.SessionCode</code></td>
+                        <td style="color:var(--text-muted)">@(item.WifiSSID ?? "—")</td>
+                        <td style="color:var(--text-muted);font-size:0.78rem">@(item.IPAddress ?? "—")</td>
+                        <td>
+                            @if (item.Status == "Flagged")
+                            {
+                                <span class="badge-flagged">⚠ Flagged</span>
+                            }
+                            else
+                            {
+                                <span class="badge-rejected">✕ Rejected</span>
+                            }
+                        </td>
+                        <td style="font-size:0.78rem;color:var(--text-muted);max-width:180px">
+                            @(item.RejectionReason ?? "—")
+                        </td>
+                        <td style="font-size:0.78rem;color:var(--text-muted)">
+                            @item.SubmittedAt.ToString("dd MMM yyyy HH:mm")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

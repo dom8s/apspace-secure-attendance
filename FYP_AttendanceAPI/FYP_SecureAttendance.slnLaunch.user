@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "FYP_AttendanceAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\FYP_Dashboard\\FYP_Dashboard.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

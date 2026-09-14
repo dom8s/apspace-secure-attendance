@@ -1,0 +1,63 @@
+@model List<AttendanceSummaryViewModel>
+@{ ViewData["Title"] = "Attendance Summary"; }
+
+<div class="page-header">
+    <div class="page-title">Attendance Summary</div>
+    <div class="page-subtitle">Per-student attendance breakdown across all subjects</div>
+</div>
+
+<div class="card-dark">
+    @if (!Model.Any())
+    {
+        <div style="text-align:center;padding:40px;color:var(--text-muted)">
+            No attendance data yet.
+        </div>
+    }
+    else
+    {
+        <table class="table-dark-custom">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Total</th>
+                    <th>Accepted</th>
+                    <th>Flagged</th>
+                    <th>Rejected</th>
+                    <th>Acceptance Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderByDescending(x => x.AcceptanceRate))
+                {
+                    <tr>
+                        <td>
+                            <div style="font-weight:600">@item.TPNumber</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted)">@item.FullName</div>
+                        </td>
+                        <td>
+                            <div>@item.SubjectCode</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted)">@item.SubjectName</div>
+                        </td>
+                        <td>@item.TotalSubmissions</td>
+                        <td><span class="badge-accepted">@item.Accepted</span></td>
+                        <td><span class="badge-flagged">@item.Flagged</span></td>
+                        <td><span class="badge-rejected">@item.Rejected</span></td>
+                        <td style="min-width:130px">
+                            <div style="font-weight:600;margin-bottom:4px;
+                                color:@(item.AcceptanceRate >= 75 ? "var(--success)" : item.AcceptanceRate >= 50 ? "var(--warning)" : "var(--danger)")">
+                                @item.AcceptanceRate%
+                            </div>
+                            <div class="progress-dark">
+                                <div class="progress-fill"
+                                     style="width:@item.AcceptanceRate%;
+                                            background:@(item.AcceptanceRate >= 75 ? "var(--success)" : item.AcceptanceRate >= 50 ? "var(--warning)" : "var(--danger)")">
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

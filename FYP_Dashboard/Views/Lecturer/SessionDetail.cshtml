@@ -1,0 +1,97 @@
+@* ── SessionDetail.cshtml ── *@
+@model SessionDetailViewModel
+@{ ViewData["Title"] = "Session Detail"; }
+
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div>
+        <div class="page-title">Session Detail</div>
+        <div class="page-subtitle">@Model.SubjectCode — @Model.SubjectName</div>
+    </div>
+    <a href="/Lecturer/Sessions" class="btn-outline-accent">← Back</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card-dark" style="text-align:center">
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">SESSION CODE</div>
+            <div class="session-code">@Model.SessionCode</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:10px">
+                Share this code with students
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card-dark">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div style="font-size:0.75rem;color:var(--text-muted)">Status</div>
+                    <div style="margin-top:4px">
+                        @if (Model.IsActive && Model.ExpiresAt > DateTime.UtcNow)
+                        {
+                            <span class="badge-active">● Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge-closed">Closed</span>
+                        }
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div style="font-size:0.75rem;color:var(--text-muted)">Total Attendees</div>
+                    <div style="font-size:1.5rem;font-weight:700;color:var(--accent)">@Model.Attendees.Count</div>
+                </div>
+                <div class="col-6">
+                    <div style="font-size:0.75rem;color:var(--text-muted)">Created</div>
+                    <div style="font-size:0.875rem;margin-top:2px">@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</div>
+                </div>
+                <div class="col-6">
+                    <div style="font-size:0.75rem;color:var(--text-muted)">Expires</div>
+                    <div style="font-size:0.875rem;margin-top:2px">@Model.ExpiresAt.ToString("dd MMM yyyy HH:mm")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-dark">
+    <div style="font-size:0.95rem;font-weight:600;margin-bottom:16px">
+        Attendance List
+        <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;margin-left:8px">
+            @Model.Attendees.Count student(s) recorded
+        </span>
+    </div>
+
+    @if (!Model.Attendees.Any())
+    {
+        <div style="text-align:center;padding:30px;color:var(--text-muted)">
+            No students have submitted attendance for this session yet.
+        </div>
+    }
+    else
+    {
+        <table class="table-dark-custom">
+            <thead>
+                <tr><th>TP Number</th><th>Student Name</th><th>Status</th><th>Submitted At</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.Attendees.OrderBy(x => x.TPNumber))
+                {
+                    <tr>
+                        <td style="font-weight:600">@a.TPNumber</td>
+                        <td>@a.FullName</td>
+                        <td>
+                            @if (a.Status == "Accepted")      { <span class="badge-accepted">✓ Accepted</span> }
+                            else if (a.Status == "Flagged")   { <span class="badge-flagged">⚠ Flagged</span>  }
+                            else                              { <span class="badge-rejected">✕ Rejected</span> }
+                        </td>
+                        <td style="color:var(--text-muted);font-size:0.8rem">
+                            @a.SubmittedAt.ToString("dd MMM yyyy HH:mm")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@* ── CreateSession.cshtml ── *@

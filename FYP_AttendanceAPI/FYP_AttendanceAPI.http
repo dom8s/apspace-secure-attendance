@@ -1,0 +1,6 @@
+@FYP_AttendanceAPI_HostAddress = http://localhost:5215
+
+GET {{FYP_AttendanceAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

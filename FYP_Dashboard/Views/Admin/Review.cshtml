@@ -1,0 +1,31 @@
+@* ── Review.cshtml ── *@
+@model ReviewDeviceLogViewModel
+@{ ViewData["Title"] = "Review Device Log"; }
+
+<div class="page-header">
+    <div class="page-title">Review Device Log</div>
+    <div class="page-subtitle">Add admin notes and mark as reviewed</div>
+</div>
+
+<div class="card-dark" style="max-width:520px">
+    <form method="post">
+        <input type="hidden" asp-for="LogId" />
+        <div class="mb-4">
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px">Log ID</div>
+            <div style="font-weight:600;color:var(--accent)">#@Model.LogId</div>
+        </div>
+        <div class="mb-4">
+            <label class="form-label-dark">Admin Notes</label>
+            <textarea asp-for="AdminNotes"
+                      class="form-control-dark"
+                      rows="4"
+                      placeholder="e.g. Confirmed proxy attendance. Referred for disciplinary action."></textarea>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn-accent">
+                <i class="bi bi-check-lg me-1"></i> Mark as Reviewed
+            </button>
+            <a href="/Admin/DeviceLogs" class="btn-outline-accent">Cancel</a>
+        </div>
+    </form>
+</div>

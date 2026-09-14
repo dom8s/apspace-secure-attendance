@@ -1,0 +1,63 @@
+@model CreateSessionViewModel
+@{ ViewData["Title"] = "Create Session"; }
+
+<div class="page-header">
+    <div class="page-title">Create Attendance Session</div>
+    <div class="page-subtitle">Generate a new 3-digit code for students to mark attendance</div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-5">
+        <div class="card-dark">
+            <form method="post">
+                <div class="mb-4">
+                    <label class="form-label-dark">Subject ID</label>
+                    <input asp-for="SubjectId"
+                           type="number"
+                           class="form-control-dark"
+                           placeholder="Enter subject ID (e.g. 1)" />
+                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">
+                        Subject ID 1 = Final Year Project (CT098-3-3-CYB)
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <div class="alert-dark-danger mb-3">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>@Model.ErrorMessage
+                    </div>
+                }
+
+                <button type="submit" class="btn-accent w-100">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Generate Session Code
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.CreatedCode))
+    {
+        <div class="col-md-7">
+            <div class="card-dark">
+                <div class="alert-dark-success mb-4">
+                    <i class="bi bi-check-circle-fill me-2"></i>@Model.SuccessMessage
+                </div>
+
+                <div style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-bottom:8px">
+                    SESSION CODE — valid for 15 minutes
+                </div>
+                <div class="session-code">@Model.CreatedCode</div>
+
+                <div style="font-size:0.8rem;color:var(--text-muted);text-align:center;margin-top:16px">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Display this code or write it on the board for students to enter in APSpace.
+                </div>
+
+                <div class="d-flex gap-2 mt-4 justify-content-center">
+                    <a href="/Lecturer/Sessions" class="btn-outline-accent">View All Sessions</a>
+                    <button onclick="window.location.reload()" class="btn-accent">New Code</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
